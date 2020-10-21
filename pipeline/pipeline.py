@@ -220,7 +220,7 @@ def measure_curvature(ploty, left_fit, right_fit):
     return left_curverad, right_curverad
 
 
-def car_position(img, ploty_real, left_fit_real, right_fit_real, offset=1.398877002384628):
+def car_position(img, ploty_real, left_fit_real, right_fit_real):
     """
     Return car position relative to the center of the lane
     """
@@ -229,9 +229,9 @@ def car_position(img, ploty_real, left_fit_real, right_fit_real, offset=1.398877
         left_fit_real[1] * y_bottom + left_fit_real[2]
     right_lane_x_position = right_fit_real[0] * y_bottom**2 + \
         right_fit_real[1] * y_bottom + right_fit_real[2]
-    middle_position = xm_per_pix * img.shape[0] / 2
+    middle_position = xm_per_pix * img.shape[1] / 2
 
     possition = middle_position - \
-        (right_lane_x_position + left_lane_x_position) / 2 + offset
+        (right_lane_x_position + left_lane_x_position) / 2
 
     return possition
