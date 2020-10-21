@@ -7,6 +7,10 @@ dist_parameters = np.load("parameters_dist.npy")
 mtx_perspective = np.load("mtx_perspective.npy")
 mtx_inv_perspective = np.load("mtx_inv_perspective.npy")
 
+# approximated rattio of real distance length agains pixels of the eagle eye images
+ym_per_pix = 3 / (590 - 555)
+xm_per_pix = 3.7 / (1040 - 270)
+
 
 def undistort_image(image):
     """"
@@ -174,3 +178,60 @@ def fit_around_poly(binary_warped, left_fit, right_fit, margin=100):
         binary_warped.shape, leftx, lefty, rightx, righty)
 
     return left_fit, right_fit, left_fitx, right_fitx, ploty
+
+
+def fit_to_real_space(left_fit, right_fit, ym_per_pix=ym_per_pix, xm_per_pix=xm_per_pix):
+    '''
+    tranforms the fit from pixel space to real world space
+    '''
+    left_fit_real = np.zeros_like(left_fit)
+    right_fit_real = np.zeros_like(right_fit)
+
+    left_fit_real[0] = xm_per_pix * left_fit[0] / ym_per_pix**2
+    left_fit_real[1] = xm_per_pix * left_fit[1] / ym_per_pix
+    left_fit_real[2] = xm_per_pix * left_fit[2]
+
+    right_fit_real[0] = xm_per_pix * right_fit[0] / ym_per_pix**2
+    right_fit_real[1] = xm_per_pix * right_fit[1] / ym_per_pix
+    right_fit_real[2] = xm_per_pix * right_fit[2]
+
+    return left_fit_real, right_fit_real
+
+
+def measure_curvature(ploty, left_fit, right_fit):
+    '''
+    Calculates the curvature of polynomial functions in the given dimensions.
+    '''
+    # Define y-value where we want radius of curvature
+    # We'll choose the maximum y-value, corresponding to the bottom of the image
+    y_eval = np.max(ploty)
+
+    A_left = left_fit[0]
+    B_left = left_fit[1]
+    A_right = right_fit[0]
+    B_right = right_fit[1]
+
+    # Calculation of R_curve (radius of curvature)
+    left_curverad = np.power(
+        1 + np.power(2*A_left*y_eval + B_left, 2), 1.5) / (2 * np.abs(A_left))
+    right_curverad = np.power(
+        1 + np.power(2*A_right*y_eval + B_right, 2), 1.5) / (2 * np.abs(A_right))
+
+    return left_curverad, right_curverad
+
+
+def car_position(img, ploty_real, left_fit_real, right_fit_real, offset=1.398877002384628):
+    """
+    Return car position relative to the center of the lane
+    """
+    y_bottom = np.max(ploty_real)
+    left_lane_x_position = left_fit_real[0] * y_bottom**2 + \
+        left_fit_real[1] * y_bottom + left_fit_real[2]
+    right_lane_x_position = right_fit_real[0] * y_bottom**2 + \
+        right_fit_real[1] * y_bottom + right_fit_real[2]
+    middle_position = xm_per_pix * img.shape[0] / 2
+
+    possition = middle_position - \
+        (right_lane_x_position + left_lane_x_position) / 2 + offset
+
+    return possition
