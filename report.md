@@ -129,4 +129,10 @@ Here's a [link to my video result](./output_images/pipeline/project_video.mp4)
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+In general this is a huge improvement over the previous project. The lanes are detected with more accuracy and the algorithm is not so sensitive to shadows and changes in the lane color. Never the less looking at the challenge video:
+
+Here's a [link to my video result](./output_images/pipeline/project_video.mp4)
+
+We can see there is plenty room for improvement. In this video there are frames in which there is a road division with new road. And the current algorithm confuse this division with a lane. So I think the colour of the lane should be somehow be taken into account and not only the derivative in the x axis, because this alone will confuse any kind of vertical line with a lane.
+
+Also I am not complete sure this is the best way to compute the curvature, the values change rapidly and it is not dimensional correct. So probably a more robust computation taking into account more points and not just the bottom one could improve this.
