@@ -53,7 +53,20 @@ Then both contribution are combined. We can see the individual contribution in t
 
 We can see that together most of the lines are detected. To see all the images go to [output_images/threshold/](./output_images/threshold/). To find more details of the process consult [pipeline/threshold.ipynb](./pipeline/threshold.ipynb).
 
-### Apply a perspective transform to rectify binary image ("birds-eye view").
+### Eagle eye view
+
+For this transformation the straight lines images provided in the calibration images were used. The idea was to find 4 points which would land on the lane for both images. This points were set as the source and the destination was a rectangle using the widest x separation as base. The mtx_perspective and mtx_inv_perspective were obtained and tested to see if the transformation produced straight lines. We can see that is is fulfilled:
+
+Original:
+
+![Lanes Image](./output_images/eagle_eye/straight_lines1_original.jpg)
+
+Eagle eye:
+
+![Lanes Image](./output_images/eagle_eye/straight_lines1.jpg)
+
+To find more details of the process consult [pipeline/eagle_eye.ipynb](./pipeline/eagle_eye.ipynb).
+
 ### Detect lane pixels and fit to find the lane boundary.
 ### Determine the curvature of the lane and vehicle position with respect to center.
 ### Warp the detected lane boundaries back onto the original image.
