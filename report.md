@@ -40,7 +40,18 @@ To see all the images go to [output_images/calibration/](./output_images/calibra
 
 ### Threshold binary generation
 
+The threshold binary image generation consists on a transformation to the hls color space.Then it has two contributions:
 
+1. A Sobel x derivative to the l chanel and then a threshold to the result.
+2. A threshold to the s chanel is applied
+
+Then both contribution are combined. We can see the individual contribution in this image for example where the first contribution is green and the second in blue.
+
+![Lanes Image](./output_images/threshold/test2.jpg)
+
+![Lanes Image](./output_images/threshold/test3.jpg)
+
+We can see that together most of the lines are detected. To see all the images go to [output_images/threshold/](./output_images/threshold/). To find more details of the process consult [pipeline/threshold.ipynb](./pipeline/threshold.ipynb).
 
 ### Apply a perspective transform to rectify binary image ("birds-eye view").
 ### Detect lane pixels and fit to find the lane boundary.
