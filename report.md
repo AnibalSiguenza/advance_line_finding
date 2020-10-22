@@ -1,10 +1,5 @@
-## Writeup Template
+# Advanced Lane Finding Project
 
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
-
-**Advanced Lane Finding Project**
 
 The goals / steps of this project are the following:
 
@@ -29,9 +24,29 @@ The goals / steps of this project are the following:
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
-### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
+### Camera calibration
 
----
+The camera calibration was done using chessboard images found in [camera_cal](./camera_cal). First the intersection points were found and using cv2.calibrateCamera function the distortion matrix and the distortion coefficients were computed for each of the images. Later the matrix and the coefficient were averaged to produce a single method. The matrix was saved as mtx_dist.npy and the parameters as parameters_dist.npy. Then this parameters are used to undistort images by loading the numpy arrays. This methods was validated by undistorting the calibration images. These are some examples:
+
+Before:
+
+![Lanes Image](./camera_cal/calibration1.jpg)
+
+After
+
+![Lanes Image](./output_images/calibration/calibration1.jpg)
+
+To see all the images go to [output_images/calibration/](./output_images/calibration/). To find more details of the process consult [pipeline/camera_calibration.ipynb](./pipeline/camera_calibration.ipynb).
+
+### Threshold binary generation
+
+
+
+### Apply a perspective transform to rectify binary image ("birds-eye view").
+### Detect lane pixels and fit to find the lane boundary.
+### Determine the curvature of the lane and vehicle position with respect to center.
+### Warp the detected lane boundaries back onto the original image.
+### Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
 ### Writeup / README
 
