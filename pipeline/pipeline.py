@@ -7,7 +7,7 @@ dist_parameters = np.load("parameters_dist.npy")
 mtx_perspective = np.load("mtx_perspective.npy")
 mtx_inv_perspective = np.load("mtx_inv_perspective.npy")
 
-# approximated rattio of real distance length agains pixels of the eagle eye images
+# approximated ratio of real distance length agains pixels of the eagle eye images
 ym_per_pix = 3 / (590 - 555)
 xm_per_pix = 3.7 / (1040 - 270)
 
@@ -23,7 +23,7 @@ def undistort_image(image):
 
 def threshold(image, s_thresh=(150, 255), sx_thresh=(23, 150)):
     """
-    Filter image to obtein a bitmap with the way lanes
+    Filter image to obtain a bitmap with the way lanes
     """
     hls = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
     l_channel = hls[:, :, 1]
@@ -52,9 +52,9 @@ def threshold(image, s_thresh=(150, 255), sx_thresh=(23, 150)):
 
 def eagle_eye(image):
     """
-    Proyect the image to the eagle eye view
+    Project the image to the eagle eye view
 
-    Note: it is asumed that the image was previously undistorted
+    Note: it is assumed that the image was previously undistorted
     """
     img_size = (image.shape[1], image.shape[0])
 
@@ -63,7 +63,7 @@ def eagle_eye(image):
 
 def eagle_eye_inv(image):
     """
-    Proyect the eagle eye to the normal view
+    Project the eagle eye to the normal view
     """
     img_size = (image.shape[1], image.shape[0])
 
@@ -72,7 +72,7 @@ def eagle_eye_inv(image):
 
 def find_lane_pixels_window(binary_warped, nwindows=10, margin=100, minpix=40):
     """
-    Finds the pixels which are part of a lane using a moving window metod. The binary warp
+    Finds the pixels which are part of a lane using a moving window method. The binary warp
     represents a binary map of the lanes in eagle view
     """
     # Take a histogram of the bottom half of the image
@@ -244,7 +244,7 @@ class Pipeline():
 
     def step(self, img):
         """
-        Pipeline to detect the lanes, cuvature radious and car position
+        Pipeline to detect the lanes, curvature radius and car position
 
         It returns an image which show the result of this computations.
         """
@@ -252,17 +252,17 @@ class Pipeline():
         img_undist = undistort_image(img)
 
         # def pipeline(img):
-        # bitmap with streigh guides
+        # bitmap with straight guides
         bitmap = threshold(img_undist, s_thresh=(
             160, 255), sx_thresh=(28, 150))
 
-        # eagle view with streigh guides
+        # eagle view with straight guides
         img_eagle_eye = eagle_eye(bitmap)
 
         y_half = int(img_eagle_eye.shape[0] / 2)
         bottom_half = img_eagle_eye[y_half:, :]
 
-        # computing poly_fit using find_lane_pixels_window if there is no polinomial and otherwise ise the fit_around_poly
+        # computing poly_fit using find_lane_pixels_window if there is no polynomial and otherwise ise the fit_around_poly
         if ((self.left_fit is None) or (self.right_fit is None)):
             leftx, lefty, rightx, righty = find_lane_pixels_window(
                 bottom_half, nwindows=10, margin=100, minpix=40)
@@ -286,11 +286,11 @@ class Pipeline():
         cv2.fillPoly(lines_img, np.int_([lane_area]), (0, 255, 0))
 
         # Plot the polynomial lines onto the image
-        thikness = 20
+        thickness = 20
         lines_img = cv2.polylines(lines_img, np.int32(
-            [left_pts]), False, (255, 0, 0), thikness)
+            [left_pts]), False, (255, 0, 0), thickness)
         lines_img = cv2.polylines(lines_img, np.int32(
-            [right_pts]), False, (0, 0, 255), thikness)
+            [right_pts]), False, (0, 0, 255), thickness)
 
         # apply inverse of the eagle eye transformation
         img_eagle_eye = eagle_eye_inv(lines_img)
@@ -298,7 +298,7 @@ class Pipeline():
         # combine with original image
         combined_img = cv2.addWeighted(img_undist, 1, img_eagle_eye, 0.6, 0)
 
-        # tranfomation to real space
+        # transformation to real space
         left_fit_real, right_fit_real = fit_to_real_space(
             self.left_fit, self.right_fit)
         ploty_real = ploty * ym_per_pix
@@ -307,11 +307,11 @@ class Pipeline():
         # computing curvature
         left_curverad, right_curverad = measure_curvature(
             ploty_real, left_fit_real, right_fit_real)
-        curve_radious = (left_curverad + right_curverad) / 2
+        curve_radius = (left_curverad + right_curverad) / 2
 
         # printing information into the image
         string_curvature = "The curvature radios is " + \
-            "{:.2f}".format(curve_radious) + "m"
+            "{:.2f}".format(curve_radius) + "m"
         string_position = "The car position is " + \
             "{:.2f}".format(position) + "m from the center"
         font = cv2.FONT_HERSHEY_SIMPLEX
