@@ -235,3 +235,94 @@ def car_position(img, ploty_real, left_fit_real, right_fit_real):
         (right_lane_x_position + left_lane_x_position) / 2
 
     return possition
+
+
+class Pipeline():
+    def __init__(self):
+        self.left_fit = None
+        self.right_fit = None
+
+    def step(self, img):
+        """
+        Pipeline to detect the lanes, cuvature radious and car position
+
+        It returns an image which show the result of this computations.
+        """
+        # undistort image
+        img_undist = undistort_image(img)
+
+        # def pipeline(img):
+        # bitmap with streigh guides
+        bitmap = threshold(img_undist, s_thresh=(
+            160, 255), sx_thresh=(28, 150))
+
+        # eagle view with streigh guides
+        img_eagle_eye = eagle_eye(bitmap)
+
+        y_half = int(img_eagle_eye.shape[0] / 2)
+        bottom_half = img_eagle_eye[y_half:, :]
+
+        # computing poly_fit using find_lane_pixels_window if there is no polinomial and otherwise ise the fit_around_poly
+        if ((self.left_fit is None) or (self.right_fit is None)):
+            leftx, lefty, rightx, righty = find_lane_pixels_window(
+                bottom_half, nwindows=10, margin=100, minpix=40)
+            self.left_fit, self.right_fit, left_fitx, right_fitx, ploty = fit_poly(
+                bottom_half.shape, leftx, lefty, rightx, righty)
+        else:
+            self.left_fit, self.right_fit, left_fitx, right_fitx, ploty = fit_around_poly(
+                bottom_half, self.left_fit, self.right_fit,  margin=30)
+
+        # Init image to plot lane
+        lines_img = np.zeros_like(img)
+
+        # Plot the are between the fitting lines
+        left_pts = np.transpose(np.array([left_fitx, y_half + ploty]))
+        right_pts = np.transpose(np.array([right_fitx, y_half + ploty]))
+        left_line_window = np.array(
+            [np.transpose(np.vstack([left_fitx, y_half + ploty]))])
+        right_line_window = np.array([np.flipud(np.transpose(np.vstack([right_fitx,
+                                                                        y_half + ploty])))])
+        lane_area = np.hstack((left_line_window, right_line_window))
+        cv2.fillPoly(lines_img, np.int_([lane_area]), (0, 255, 0))
+
+        # Plot the polynomial lines onto the image
+        thikness = 20
+        lines_img = cv2.polylines(lines_img, np.int32(
+            [left_pts]), False, (255, 0, 0), thikness)
+        lines_img = cv2.polylines(lines_img, np.int32(
+            [right_pts]), False, (0, 0, 255), thikness)
+
+        # apply inverse of the eagle eye transformation
+        img_eagle_eye = eagle_eye_inv(lines_img)
+
+        # combine with original image
+        combined_img = cv2.addWeighted(img_undist, 1, img_eagle_eye, 0.6, 0)
+
+        # tranfomation to real space
+        left_fit_real, right_fit_real = fit_to_real_space(
+            self.left_fit, self.right_fit)
+        ploty_real = ploty * ym_per_pix
+
+        position = car_position(img, ploty_real, left_fit_real, right_fit_real)
+        # computing curvature
+        left_curverad, right_curverad = measure_curvature(
+            ploty_real, left_fit_real, right_fit_real)
+        curve_radious = (left_curverad + right_curverad) / 2
+
+        # printing information into the image
+        string_curvature = "The curvature radios is " + \
+            "{:.2f}".format(curve_radious) + "m"
+        string_position = "The car position is " + \
+            "{:.2f}".format(position) + "m from the center"
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        bottomLeftCornerOfCurvatureText = (100, 100)
+        bottomLeftCornerOfPositionText = (100, 150)
+        fontScale = 1
+        fontColor = (255, 255, 255)
+        lineType = 2
+        cv2.putText(combined_img, string_curvature,
+                    bottomLeftCornerOfCurvatureText, font, fontScale, fontColor, lineType)
+        cv2.putText(combined_img, string_position,
+                    bottomLeftCornerOfPositionText, font, fontScale, fontColor, lineType)
+
+        return combined_img
