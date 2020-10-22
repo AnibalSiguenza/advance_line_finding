@@ -55,7 +55,7 @@ We can see that together most of the lines are detected. To see all the images g
 
 ### Eagle eye view
 
-For this transformation the straight lines images provided in the calibration images were used. The idea was to find 4 points which would land on the lane for both images. This points were set as the source and the destination was a rectangle using the widest x separation as base. The mtx_perspective and mtx_inv_perspective were obtained and tested to see if the transformation produced straight lines. We can see that is is fulfilled:
+For this transformation the straight lines images provided in the calibration images were used. The idea was to find 4 points which would land on the lane for both images. This points were set as the source and the destination was a rectangle using the widest x separation as base. The mtx_perspective and mtx_inv_perspective were obtained using cv2.getPerspectiveTransform, and then used  with the function cv2.warpPerspective to apply the transformation. The images were tested to see if the transformation produced straight lines. We can see that is is fulfilled:
 
 Original:
 
@@ -68,8 +68,29 @@ Eagle eye:
 To find more details of the process consult [pipeline/eagle_eye.ipynb](./pipeline/eagle_eye.ipynb).
 
 ### Detect lane pixels and fit to find the lane boundary.
+
+To perform this 2 method were implemented:
+
+1. find_lane_pixels_window this method uses the moving windows shown in class to find the relevant points from each lane. The windows are originally positioned by a histogram method.
+2. fit_around_poly the window is the previous polifit from the last image, which is delimitated with a margin.
+
+The first method is use in the first frame of the video. Later it is used the second and it was observed that the result with the second were more stable and more efficient to compute. We can see the fitting in eagle view for both methods below:
+
+Moving window:
+
+![Lanes Image](./output_images/lane_detection/moving_window/test2.jpg)
+
+Fit around polynomial
+
+![Lanes Image](./output_images/lane_detection/poly_filter/test2.jpg)
+
+To see all the images go to [output_images/lane_detection/](./output_images/lane_detection/). To find more details of the process consult [pipeline/lane_detection.ipynb](./pipeline/lane_detection.ipynb).
+
 ### Determine the curvature of the lane and vehicle position with respect to center.
-### Warp the detected lane boundaries back onto the original image.
+### Warp the detected lane boundaries back onto the original image
+
+This was done using the previously computed mtx_inv_perspective in the eagle eye, and using the cv2.warpPerspective. Since the computation were done using the lower part of the image. The image was translated by y_half
+
 ### Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
 ### Writeup / README
