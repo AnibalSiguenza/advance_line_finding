@@ -231,10 +231,10 @@ def car_position(img, ploty_real, left_fit_real, right_fit_real):
         right_fit_real[1] * y_bottom + right_fit_real[2]
     middle_position = xm_per_pix * img.shape[1] / 2
 
-    possition = middle_position - \
+    position = middle_position - \
         (right_lane_x_position + left_lane_x_position) / 2
 
-    return possition
+    return position
 
 
 class Pipeline():

@@ -87,6 +87,27 @@ Fit around polynomial
 To see all the images go to [output_images/lane_detection/](./output_images/lane_detection/). To find more details of the process consult [pipeline/lane_detection.ipynb](./pipeline/lane_detection.ipynb).
 
 ### Determine the curvature of the lane and vehicle position with respect to center.
+
+To obtain an approximation of the pixel to meter ratio, I used the straight image 1, then apply an eagle eye view and visually fit a square from lane line to lane line, and between a dash-line. Knowing that the standard lane line has width of 3.7m and the standard dash line 3m. I computed an approximated ym_per_pix and xm_per_pix ratio.
+
+![Lanes Image](./output_images/lane_curvature_and_position/fitting.jpg)
+
+With this ratios a defined a transformation to real world meters for the new coefficient of the polynomial fit. Having the coefficients in meters then it is only needed to apply the formula. The values seem to be reasonable. The 1 KM was not obtain but the values are in magnitude range of the problem and it behaves as expected in most of the cases. In strait lines being a big value for example:
+
+![Lanes Image](./output_images/lane_curvature/straight_lines2.jpg)
+
+And for sharp curves having a smaller value:
+
+![Lanes Image](./output_images/lane_curvature/test3.jpg)
+
+![Lanes Image](./output_images/lane_curvature/test5.jpg)
+
+There are some cases in which the 2 lanes show different curvature, specially if there was a lane with hard conditions as the following one in which there is a shadow and a change of color in the road. Consequently there is still room for improvement or at least selection of the most accurate value in between this 2.
+
+To approximate the car position with respect to the lane I will assume the camera is at the center of the car and aligned with the lane. So I will compute the lane closest to the car and make an interpolation using the lane width od 3.7m
+
+To find more details of the process consult [pipeline/lane_curvature_and_position.ipynb](./pipeline/lane_curvature_and_position.ipynb).
+
 ### Warp the detected lane boundaries back onto the original image
 
 This was done using the previously computed mtx_inv_perspective in the eagle eye, and using the cv2.warpPerspective. Since the computation were done using the lower part of the image. The image was translated by y_half
